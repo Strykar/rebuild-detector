@@ -34,11 +34,27 @@ get_broken_pkgs() {
     } | sort -u
 }
 
+get_broken_perlpy_pkgs() {
+    {
+        get_broken_python_pkgs
+        get_broken_perl_pkgs
+    } | sort -u
+}
+
 get_repo_pkgs() {
     pacman -Sl | cut -d' ' -f1-2
     pacman -Qqm | awk '{print "foreign", $0}'
 }
 
-join -12 <(get_repo_pkgs | sort -k2) <(get_broken_pkgs) | awk '{ print $2 "\t" $1 }'
+case "$1" in
+'py-perl')
+    join -12 <(get_repo_pkgs | sort -k2) <(get_broken_perlpy_pkgs) | awk '{ print $2 "\t" $1 }'
+    ;;
+'')
+    join -12 <(get_repo_pkgs | sort -k2) <(get_broken_pkgs) | awk '{ print $2 "\t" $1 }'
+    ;;
+*)
+    echo "usage $0 py-perl|or no arguments at all"
+esac
 
 exit 0
